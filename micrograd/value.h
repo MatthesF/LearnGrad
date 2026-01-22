@@ -37,6 +37,7 @@ class Value {
 
         Value tanh();
         Value pow(double exponent);
+        void zero_grad();
 };
 
 Value operator+(const Value& lhs, const Value& rhs);

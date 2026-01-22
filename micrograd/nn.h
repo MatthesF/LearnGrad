@@ -106,4 +106,11 @@ class MLP{
             }
             return params;
         }
+
+        void zero_grad() {
+            auto params = parameters(); 
+            for (auto& p : params) {
+                p.zero_grad();
+            }
+        }
 };

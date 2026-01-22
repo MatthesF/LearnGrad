@@ -1,5 +1,5 @@
 #include "value.h"
-#include <set>
+#include <unordered_set>
 #include <cmath>
 
 Value operator+(const Value& lhs, const Value& rhs)
@@ -53,7 +53,7 @@ Value operator/(const Value& lhs, const Value& rhs)
 std::vector<std::shared_ptr<ValueImpl>> build_topo(const Value& node){
 
     std::vector<std::shared_ptr<ValueImpl>> topo;
-    std::set<std::shared_ptr<ValueImpl>> visited;
+    std::unordered_set<std::shared_ptr<ValueImpl>> visited;
 
     std::function<void(const std::shared_ptr<ValueImpl>&)> build = [&](const std::shared_ptr<ValueImpl>& node){
         if (visited.contains(node)) return;
@@ -98,4 +98,6 @@ Value Value::pow(double exponent){
     };
     return new_node;
 }
+
+void Value::zero_grad() { ptr->grad = 0.0; }
 
