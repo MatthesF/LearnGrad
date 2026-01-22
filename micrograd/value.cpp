@@ -101,3 +101,4 @@ Value Value::pow(double exponent){
 
 void Value::zero_grad() { ptr->grad = 0.0; }
 
+void Value::update(double lr) { ptr->value -= lr * ptr->grad; }

@@ -37,7 +37,9 @@ class Value {
 
         Value tanh();
         Value pow(double exponent);
+        
         void zero_grad();
+        void update(double lr);
 };
 
 Value operator+(const Value& lhs, const Value& rhs);
@@ -53,3 +55,4 @@ Value operator/(const Value& lhs, const Value& rhs);
 std::vector<std::shared_ptr<ValueImpl>> build_topo(const Value& node);
 
 void backprop(const Value& root);
+

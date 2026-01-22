@@ -81,7 +81,8 @@ class MLP{
                 }
         }
 
-        std::vector<Value> operator()(const std::vector<Value>& x) const {
+        std::vector<Value> operator()(const std::vector<Value>& inputs) const {
+            std::vector<Value> x = inputs;
             for (const auto& layer : layers) {
                 x = layer(x);
             }
@@ -111,6 +112,13 @@ class MLP{
             auto params = parameters(); 
             for (auto& p : params) {
                 p.zero_grad();
+            }
+        }
+
+        void update(double lr) {
+            auto params = parameters(); 
+            for (auto& p : params) {
+                p.update(lr);
             }
         }
 };
