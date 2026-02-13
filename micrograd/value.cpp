@@ -1,6 +1,7 @@
 #include "value.h"
 #include <unordered_set>
 #include <cmath>
+#include <functional>
 
 Value operator+(const Value& lhs, const Value& rhs)
 {
@@ -71,14 +72,14 @@ void backprop(const Value& root){
     }
 }
 
-Value Value::tanh(){
+Value Value::tanh() const {
     Value new_node{std::tanh(ptr->value)};
     new_node.ptr->vjp_dependencies.reserve(1);
     new_node.ptr->vjp_dependencies.emplace_back(ptr, 1.0 - (new_node.ptr->value * new_node.ptr->value));
     return new_node;
 }
 
-Value Value::pow(double exponent){
+Value Value::pow(double exponent) const {
     Value new_node{std::pow(ptr->value,exponent)};
     new_node.ptr->vjp_dependencies.reserve(1);
     new_node.ptr->vjp_dependencies.emplace_back(ptr, exponent * std::pow(ptr->value,exponent-1));

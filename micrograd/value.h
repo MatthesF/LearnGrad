@@ -37,8 +37,8 @@ class Value {
         double val() const { return ptr->value; }
         double grad() const { return ptr->grad; }
 
-        Value tanh();
-        Value pow(double exponent);
+        Value tanh() const;
+        Value pow(double exponent) const;
         
         void zero_grad();
         void update(double lr);
