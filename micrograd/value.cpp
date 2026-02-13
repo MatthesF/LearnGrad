@@ -5,32 +5,24 @@
 Value operator+(const Value& lhs, const Value& rhs)
 {
     Value new_node{lhs.ptr->value + rhs.ptr->value};
-    new_node.ptr->prev.insert(new_node.ptr->prev.end(), {lhs.ptr, rhs.ptr});
-    new_node.ptr->op = "+";
     new_node.ptr->vjp_dependencies.reserve(2);
     new_node.ptr->vjp_dependencies.emplace_back(lhs.ptr, 1.0);
     new_node.ptr->vjp_dependencies.emplace_back(rhs.ptr, 1.0);
-
     return new_node;
 }
 
 Value operator*(const Value& lhs, const Value& rhs)
 {
     Value new_node{lhs.ptr->value * rhs.ptr->value};
-    new_node.ptr->prev.insert(new_node.ptr->prev.end(), {lhs.ptr, rhs.ptr});
-    new_node.ptr->op = "*";
     new_node.ptr->vjp_dependencies.reserve(2);
     new_node.ptr->vjp_dependencies.emplace_back(lhs.ptr, rhs.ptr->value);
     new_node.ptr->vjp_dependencies.emplace_back(rhs.ptr, lhs.ptr->value);
-
     return new_node;
 }
 
 Value operator-(const Value& node)
 {
     Value new_node{node.ptr->value * -1};
-    new_node.ptr->prev.insert(new_node.ptr->prev.end(), {node.ptr});
-    new_node.ptr->op = "-";
     new_node.ptr->vjp_dependencies.reserve(1);
     new_node.ptr->vjp_dependencies.emplace_back(node.ptr, -1.0);
     return new_node;
@@ -39,8 +31,6 @@ Value operator-(const Value& node)
 Value operator-(const Value& lhs, const Value& rhs)
 {
     Value new_node{lhs.ptr->value - rhs.ptr->value};
-    new_node.ptr->prev.insert(new_node.ptr->prev.end(), {lhs.ptr, rhs.ptr});
-    new_node.ptr->op = "-";
     new_node.ptr->vjp_dependencies.reserve(2);
     new_node.ptr->vjp_dependencies.emplace_back(lhs.ptr, 1.0);
     new_node.ptr->vjp_dependencies.emplace_back(rhs.ptr, -1.0);
@@ -50,8 +40,6 @@ Value operator-(const Value& lhs, const Value& rhs)
 Value operator/(const Value& lhs, const Value& rhs)
 {
     Value new_node{lhs.ptr->value / rhs.ptr->value};
-    new_node.ptr->prev.insert(new_node.ptr->prev.end(), {lhs.ptr, rhs.ptr});
-    new_node.ptr->op = "/";
     new_node.ptr->vjp_dependencies.reserve(2);
     new_node.ptr->vjp_dependencies.emplace_back(lhs.ptr, 1/rhs.ptr->value);
     new_node.ptr->vjp_dependencies.emplace_back(rhs.ptr, - lhs.ptr->value / (rhs.ptr->value*rhs.ptr->value));
@@ -59,23 +47,17 @@ Value operator/(const Value& lhs, const Value& rhs)
 }
 
 std::vector<std::shared_ptr<ValueImpl>> build_topo(const Value& node){
-
     std::vector<std::shared_ptr<ValueImpl>> topo;
     std::unordered_set<std::shared_ptr<ValueImpl>> visited;
-
     std::function<void(const std::shared_ptr<ValueImpl>&)> build = [&](const std::shared_ptr<ValueImpl>& node){
         if (visited.contains(node)) return;
-    
         visited.insert(node);
-        for (const auto& prev_node : node->prev) {
-            build(prev_node);
-            }
+        for (const auto& vjp : node->vjp_dependencies) {
+            build(vjp.node);
+        }
         topo.push_back(node);
-
     };
-
     build(node.ptr);
-
     return topo;
 }
 
@@ -91,8 +73,6 @@ void backprop(const Value& root){
 
 Value Value::tanh(){
     Value new_node{std::tanh(ptr->value)};
-    new_node.ptr->prev = { ptr };
-    new_node.ptr->op = "tanh";
     new_node.ptr->vjp_dependencies.reserve(1);
     new_node.ptr->vjp_dependencies.emplace_back(ptr, 1.0 - (new_node.ptr->value * new_node.ptr->value));
     return new_node;
@@ -100,8 +80,6 @@ Value Value::tanh(){
 
 Value Value::pow(double exponent){
     Value new_node{std::pow(ptr->value,exponent)};
-    new_node.ptr->prev = { ptr };
-    new_node.ptr->op = "pow";
     new_node.ptr->vjp_dependencies.reserve(1);
     new_node.ptr->vjp_dependencies.emplace_back(ptr, exponent * std::pow(ptr->value,exponent-1));
     return new_node;

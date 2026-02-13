@@ -16,8 +16,6 @@ struct ValueImpl {
     double value;
     double grad{0};
 
-    std::string op;
-    std::vector<std::shared_ptr<ValueImpl>> prev;
     std::vector<VJP_dependency> vjp_dependencies;
 
     ValueImpl(double val) : value{val} {}
@@ -61,4 +59,3 @@ Value operator/(const Value& lhs, const Value& rhs);
 std::vector<std::shared_ptr<ValueImpl>> build_topo(const Value& node);
 
 void backprop(const Value& root);
-
